@@ -120,4 +120,65 @@ class ProductController extends Controller
         ->get();
         return view('front_end.myorder',['orders'=>$orders]);
     }
+
+    // admin
+    function add_product(Request $request)
+    {
+        $image=$request->file('gallery');
+        $image_name=rand() . '.' . $image->getClientOriginalExtension();
+        $image->move(public_path('storage/product/'), $image_name);
+        $input_data = array (
+            'name' => $request->name,
+            'price'=>$request->price,
+            'category'=>$request->category,
+            'gallery' => $image_name,
+            'description'=>$request->description
+        );
+        Product::create($input_data);
+        return redirect('product_list');
+    }
+    function show_product()
+    {
+        $data= Product::all();
+        return view('admin.product_list',['productss'=>$data]);
+    }
+    public function product_edit($id)
+    {
+        $data=Product::find($id);
+        return view('admin.edit_product',['productss'=>$data]);
+    }
+    public function product_update(Request $request, $id)
+    {
+        $image_name = $request->hidden_image;
+        $image = $request->file('gallery');
+        if($image != '')
+        {
+
+            $image_name=rand() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('storage/product/'),$image_name);
+        }
+
+        $input_data= array(
+            "name" => $request->name,
+            'price'=>$request->price,
+            'category'=>$request->category,
+            'gallery' => $image_name,
+            'description'=>$request->description
+        );
+        Product::whereId($id)->update($input_data);
+        return redirect ('product_list');
+    }
+    public function product_destroy($id)
+    {
+        $data=Product::find($id);
+        $data->delete();
+        return redirect('product_list');
+    }
+    function customer_details()
+    {
+        $data=Order::all();
+        return view('admin.customer_details',['customers'=>$data]);
+    }
+
+
 }
